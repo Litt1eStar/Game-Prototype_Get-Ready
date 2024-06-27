@@ -8,15 +8,30 @@ public class ObjectPicker : MonoBehaviour
     public LayerMask whatIsPickable;
     public float pickupRadius;
 
+    private bool isHoldingObject = false;
+
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && !isHoldingObject)
         {
-            PickupItem();
+            PickupObject();
+        }
+        else if(Input.GetKeyDown(KeyCode.E) && isHoldingObject)
+        {
+            DropObject();
         }
     }
 
-    private void PickupItem()
+    private void DropObject()
+    {
+        ObjectToPick objectInHand = objectHolder.GetComponentInChildren<ObjectToPick>();
+        if (objectInHand != null) 
+        {
+            objectInHand.DropObject();
+            isHoldingObject = false;
+        }
+    }
+    private void PickupObject()
     {
         Collider[] pickableColliders = Physics.OverlapSphere(transform.position, pickupRadius, whatIsPickable);
         if(pickableColliders.Length > 0)
@@ -24,6 +39,7 @@ public class ObjectPicker : MonoBehaviour
             if(pickableColliders[0].gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick itemToPickup))
             {
                 itemToPickup.PickupObject(objectHolder);
+                isHoldingObject = true;
             }
 
         }
