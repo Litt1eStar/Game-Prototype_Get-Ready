@@ -2,13 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectToPick : MonoBehaviour
+public class ObjectToPick : MonoBehaviour, IPickable
 {
     public Transform groundChecker;
     public LayerMask whatIsGround;
     public float groundCheckDistance;
     public float dragOnGround = 500f;
     public float dragOnAir = 1f;
+    public float forceMagnitude = 10f;
+
+    public Rigidbody Rigidbody => rb;
 
     private Rigidbody rb;
     private GameObject objectHolder;
@@ -22,6 +25,11 @@ public class ObjectToPick : MonoBehaviour
     private void Update()
     {
         CheckGround();
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            
+            rb.AddForce(Vector3.forward * forceMagnitude, ForceMode.Impulse);
+        }
     }
     private void FixedUpdate()
     {
@@ -41,12 +49,22 @@ public class ObjectToPick : MonoBehaviour
         if (isGrounded)
         {
             rb.drag = dragOnGround;
+            if(objectHolder == null)
+            {
+                rb.isKinematic = true;
+            }
+            else
+            {
+                rb.isKinematic = false;
+            }
         }
         else
         {
             rb.drag = dragOnAir;
+            rb.isKinematic= false;
         }
     }
+
     public void PickupObject(GameObject objectHolder)
     {
         this.objectHolder = objectHolder;
