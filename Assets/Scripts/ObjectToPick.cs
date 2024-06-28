@@ -27,14 +27,14 @@ public class ObjectToPick : MonoBehaviour, IPickable
         CheckGround();
         if (Input.GetKeyDown(KeyCode.V))
         {
-            
             rb.AddForce(Vector3.forward * forceMagnitude, ForceMode.Impulse);
         }
     }
+
     private void FixedUpdate()
     {
         SetRigidbodyInfo();
-        if (objectHolder != null) 
+        if (objectHolder != null)
         {
             rb.MovePosition(objectHolder.transform.position);
         }
@@ -44,14 +44,15 @@ public class ObjectToPick : MonoBehaviour, IPickable
     {
         isGrounded = Physics.Raycast(groundChecker.position, Vector3.down, groundCheckDistance, whatIsGround);
     }
+
     private void SetRigidbodyInfo()
     {
         if (isGrounded)
         {
             rb.drag = dragOnGround;
-            if(objectHolder == null)
+            if (objectHolder == null)
             {
-                rb.isKinematic = true;
+                rb.isKinematic = false;
             }
             else
             {
@@ -61,7 +62,7 @@ public class ObjectToPick : MonoBehaviour, IPickable
         else
         {
             rb.drag = dragOnAir;
-            rb.isKinematic= false;
+            rb.isKinematic = false;
         }
     }
 

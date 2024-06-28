@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public float sprintSpeed;
     public float movementSpeedOnCarryObject;
     public float rotationSpeed = 90f;
+    public float forceMagnitude;
 
     private Rigidbody rb;
     private float xInput;
@@ -20,6 +21,9 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 invalidDirection = new Vector3(-1, -1, -1);
     private Vector3 forwardDirectionOnStartInteraction;
     private bool isCarryingObject;
+    private FixedJoint fixedJoint;
+    private GameObject carriedObject;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -30,6 +34,11 @@ public class PlayerMovement : MonoBehaviour
     {
         CheckInput();
         CharacterRotation();
+
+        if (isCarryingObject && Input.GetKeyDown(KeyCode.E))
+        {
+            StopObjectInteraction();
+        }
     }
 
     private void FixedUpdate()
@@ -42,17 +51,17 @@ public class PlayerMovement : MonoBehaviour
         if (isCarryingObject)
         {
             currentMovementSpeed = movementSpeedOnCarryObject;
-            if(forwardDirectionOnStartInteraction != invalidDirection)
+            if (forwardDirectionOnStartInteraction != invalidDirection)
             {
                 int xDirection = Mathf.Abs((int)forwardDirectionOnStartInteraction.x);
                 int zDirection = Mathf.Abs((int)forwardDirectionOnStartInteraction.z);
-                
+
                 if (xDirection == 1 && zDirection == 0)
                 {
                     xInput = Input.GetAxisRaw("Horizontal");
                     zInput = 0;
                 }
-                else if(xDirection == 0 && zDirection == 1)
+                else if (xDirection == 0 && zDirection == 1)
                 {
                     xInput = 0;
                     zInput = Input.GetAxisRaw("Vertical");
@@ -75,7 +84,6 @@ public class PlayerMovement : MonoBehaviour
         {
             currentMovementSpeed = walkSpeed;
         }
-
     }
 
     private void CharacterRotation()
@@ -94,15 +102,48 @@ public class PlayerMovement : MonoBehaviour
         rb.MovePosition(transform.position + movement);
     }
 
-    public void StartObjectInteraction()
+    public void StartObjectInteraction(GameObject obj)
     {
         forwardDirectionOnStartInteraction = transform.forward.normalized;
         isCarryingObject = true;
+        carriedObject = obj;
+
+        Rigidbody carriedRb = carriedObject.GetComponent<Rigidbody>();
+        carriedRb.velocity = Vector3.zero;
+        carriedRb.angularVelocity = Vector3.zero;
+
+        fixedJoint = gameObject.AddComponent<FixedJoint>();
+        fixedJoint.connectedBody = carriedRb;
+        fixedJoint.breakForce = Mathf.Infinity;
+        fixedJoint.breakTorque = Mathf.Infinity;
+
+        carriedRb.isKinematic = true;
     }
 
-    public void StopObjectInteraction() 
+    public void StopObjectInteraction()
     {
-        forwardDirectionOnStartInteraction = new Vector3(-1, -1, -1);
+        forwardDirectionOnStartInteraction = invalidDirection;
         isCarryingObject = false;
+
+        if (fixedJoint != null)
+        {
+            Destroy(fixedJoint);
+            carriedObject.GetComponent<Rigidbody>().isKinematic = false;
+            carriedObject = null;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Rigidbody rigidbody = collision.collider.attachedRigidbody;
+
+        if (rigidbody != null && rigidbody != rb && collision.collider.gameObject.GetComponent<IPickable>() != null)
+        {
+            Vector3 forceDirection = collision.gameObject.transform.position - transform.position;
+            forceDirection.y = 0;
+            forceDirection.Normalize();
+
+            rigidbody.AddForceAtPosition(forceDirection * forceMagnitude, transform.position, ForceMode.Impulse);
+        }
     }
 }
