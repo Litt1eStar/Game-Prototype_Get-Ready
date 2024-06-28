@@ -5,43 +5,57 @@ using UnityEngine;
 public class ObjectPicker : MonoBehaviour
 {
     public GameObject objectHolder;
+    public GameObject pushObjectHolder;
     public LayerMask whatIsPickable;
     public float pickupRadius;
+    public float pushForceMagnitude;
 
-    private bool isHoldingObject = false;
+    private PlayerMovement playerMovement;
+    private ObjectToPick currentObjectInHand;
+    private bool isInteractingWithObject = false;
+
+    private void Start()
+    {
+        playerMovement = GetComponentInParent<PlayerMovement>();
+    }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E) && !isHoldingObject)
+        if (Input.GetKeyDown(KeyCode.F))
         {
-            PickupObject();
-        }
-        else if(Input.GetKeyDown(KeyCode.E) && isHoldingObject)
-        {
-            DropObject();
+            if (!isInteractingWithObject)
+                PushObject();
+            else
+                ReleaseObject();
         }
     }
 
-    private void DropObject()
+    private void PushObject()
     {
-        ObjectToPick objectInHand = objectHolder.GetComponentInChildren<ObjectToPick>();
-        if (objectInHand != null) 
+        if (currentObjectInHand == null)
         {
-            objectInHand.DropObject();
-            isHoldingObject = false;
-        }
-    }
-    private void PickupObject()
-    {
-        Collider[] pickableColliders = Physics.OverlapSphere(transform.position, pickupRadius, whatIsPickable);
-        if(pickableColliders.Length > 0)
-        {
-            if(pickableColliders[0].gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick itemToPickup))
+            Collider[] pickableColliders = Physics.OverlapSphere(transform.position, pickupRadius, whatIsPickable);
+            if (pickableColliders.Length > 0)
             {
-                itemToPickup.PickupObject(objectHolder);
-                isHoldingObject = true;
+                if (pickableColliders[0].gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick itemToPickup))
+                {
+                    itemToPickup.PickupObject(pushObjectHolder);
+                    currentObjectInHand = itemToPickup;
+                    playerMovement.StartObjectInteraction();
+                    isInteractingWithObject = true;
+                }
             }
+        }
+    }
 
+    private void ReleaseObject()
+    {
+        if (currentObjectInHand != null)
+        {
+            currentObjectInHand.DropObject();
+            playerMovement.StopObjectInteraction();
+            currentObjectInHand = null;
+            isInteractingWithObject = false;
         }
     }
 
