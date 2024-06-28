@@ -8,7 +8,6 @@ public class PlayerMovement : MonoBehaviour
     public float sprintSpeed;
     public float movementSpeedOnCarryObject;
     public float rotationSpeed = 90f;
-    public float forceMagnitude;
 
     private Rigidbody rb;
     private float xInput;
@@ -21,9 +20,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 invalidDirection = new Vector3(-1, -1, -1);
     private Vector3 forwardDirectionOnStartInteraction;
     private bool isCarryingObject;
-    private FixedJoint fixedJoint;
-    private GameObject carriedObject;
-
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -34,11 +30,6 @@ public class PlayerMovement : MonoBehaviour
     {
         CheckInput();
         CharacterRotation();
-
-        if (isCarryingObject && Input.GetKeyDown(KeyCode.E))
-        {
-            StopObjectInteraction();
-        }
     }
 
     private void FixedUpdate()
@@ -84,6 +75,7 @@ public class PlayerMovement : MonoBehaviour
         {
             currentMovementSpeed = walkSpeed;
         }
+
     }
 
     private void CharacterRotation()
@@ -102,48 +94,15 @@ public class PlayerMovement : MonoBehaviour
         rb.MovePosition(transform.position + movement);
     }
 
-    public void StartObjectInteraction(GameObject obj)
+    public void StartObjectInteraction()
     {
         forwardDirectionOnStartInteraction = transform.forward.normalized;
         isCarryingObject = true;
-        carriedObject = obj;
-
-        Rigidbody carriedRb = carriedObject.GetComponent<Rigidbody>();
-        carriedRb.velocity = Vector3.zero;
-        carriedRb.angularVelocity = Vector3.zero;
-
-        fixedJoint = gameObject.AddComponent<FixedJoint>();
-        fixedJoint.connectedBody = carriedRb;
-        fixedJoint.breakForce = Mathf.Infinity;
-        fixedJoint.breakTorque = Mathf.Infinity;
-
-        carriedRb.isKinematic = true;
     }
 
     public void StopObjectInteraction()
     {
-        forwardDirectionOnStartInteraction = invalidDirection;
+        forwardDirectionOnStartInteraction = new Vector3(-1, -1, -1);
         isCarryingObject = false;
-
-        if (fixedJoint != null)
-        {
-            Destroy(fixedJoint);
-            carriedObject.GetComponent<Rigidbody>().isKinematic = false;
-            carriedObject = null;
-        }
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        Rigidbody rigidbody = collision.collider.attachedRigidbody;
-
-        if (rigidbody != null && rigidbody != rb && collision.collider.gameObject.GetComponent<IPickable>() != null)
-        {
-            Vector3 forceDirection = collision.gameObject.transform.position - transform.position;
-            forceDirection.y = 0;
-            forceDirection.Normalize();
-
-            rigidbody.AddForceAtPosition(forceDirection * forceMagnitude, transform.position, ForceMode.Impulse);
-        }
     }
 }

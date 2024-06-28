@@ -27,10 +27,10 @@ public class ObjectToPick : MonoBehaviour, IPickable
         CheckGround();
         if (Input.GetKeyDown(KeyCode.V))
         {
+
             rb.AddForce(Vector3.forward * forceMagnitude, ForceMode.Impulse);
         }
     }
-
     private void FixedUpdate()
     {
         SetRigidbodyInfo();
@@ -44,7 +44,6 @@ public class ObjectToPick : MonoBehaviour, IPickable
     {
         isGrounded = Physics.Raycast(groundChecker.position, Vector3.down, groundCheckDistance, whatIsGround);
     }
-
     private void SetRigidbodyInfo()
     {
         if (isGrounded)
@@ -52,7 +51,7 @@ public class ObjectToPick : MonoBehaviour, IPickable
             rb.drag = dragOnGround;
             if (objectHolder == null)
             {
-                rb.isKinematic = false;
+                rb.isKinematic = true;
             }
             else
             {

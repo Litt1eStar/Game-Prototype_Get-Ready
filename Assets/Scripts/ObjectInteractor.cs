@@ -11,7 +11,7 @@ public class ObjectInteractor : MonoBehaviour
     public float pushForceMagnitude;
 
     private PlayerMovement playerMovement;
-    private IPickable currentObjectInHand;
+    private ObjectToPick currentObjectInHand;
     private bool isInteractingWithObject = false;
 
     private void Start()
@@ -32,16 +32,17 @@ public class ObjectInteractor : MonoBehaviour
 
     private void PushObject()
     {
+        Debug.Log("Push Object");
         if (currentObjectInHand == null)
         {
             Collider[] pickableColliders = Physics.OverlapSphere(transform.position, pickupRadius, whatIsPickable);
             if (pickableColliders.Length > 0)
             {
-                if (pickableColliders[0].gameObject.TryGetComponent<IPickable>(out IPickable itemToPickup))
+                if (pickableColliders[0].gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick itemToPickup))
                 {
                     itemToPickup.PickupObject(pushObjectHolder);
                     currentObjectInHand = itemToPickup;
-                    playerMovement.StartObjectInteraction(pickableColliders[0].gameObject);
+                    playerMovement.StartObjectInteraction();
                     isInteractingWithObject = true;
                 }
             }
