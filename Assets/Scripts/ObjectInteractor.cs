@@ -21,6 +21,11 @@ public class ObjectInteractor : MonoBehaviour
 
     private void Update()
     {
+        HandleUserInput();
+    }
+
+    private void HandleUserInput()
+    {
         if (Input.GetKeyDown(KeyCode.F))
         {
             if (!isInteractingWithObject)
@@ -29,10 +34,8 @@ public class ObjectInteractor : MonoBehaviour
                 ReleaseObject();
         }
     }
-
     private void PushObject()
     {
-        Debug.Log("Push Object");
         if (currentObjectInHand == null)
         {
             Collider[] pickableColliders = Physics.OverlapSphere(transform.position, pickupRadius, whatIsPickable);
@@ -40,9 +43,8 @@ public class ObjectInteractor : MonoBehaviour
             {
                 if (pickableColliders[0].gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick itemToPickup))
                 {
-                    itemToPickup.PickupObject(pushObjectHolder);
                     currentObjectInHand = itemToPickup;
-                    playerMovement.StartObjectInteraction();
+                    playerMovement.StartPushPullObject(itemToPickup);
                     isInteractingWithObject = true;
                 }
             }
@@ -53,9 +55,8 @@ public class ObjectInteractor : MonoBehaviour
     {
         if (currentObjectInHand != null)
         {
-            currentObjectInHand.DropObject();
-            playerMovement.StopObjectInteraction();
             currentObjectInHand = null;
+            playerMovement.StopPushPullObject();
             isInteractingWithObject = false;
         }
     }

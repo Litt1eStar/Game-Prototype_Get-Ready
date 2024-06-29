@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Player Movement Setting")]
     public float walkSpeed;
     public float sprintSpeed;
     public float movementSpeedOnCarryObject;
@@ -13,13 +15,11 @@ public class PlayerMovement : MonoBehaviour
     private float xInput;
     private float zInput;
 
-    public float XInput => xInput;
-
-    private float currentMovementSpeed;
-
+    private ObjectToPick currentObject;
     private Vector3 invalidDirection = new Vector3(-1, -1, -1);
     private Vector3 forwardDirectionOnStartInteraction;
-    private bool isCarryingObject;
+    private bool isInteractionObject = false;
+    private float currentMovementSpeed;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -37,9 +37,18 @@ public class PlayerMovement : MonoBehaviour
         ApplyMovement();
     }
 
+    private void OnCollisionStay(Collision collision)
+    {
+        if (isInteractionObject && currentObject != null) 
+        {
+            Vector3 movement = new Vector3(xInput, 0, zInput).normalized * currentMovementSpeed * Time.fixedDeltaTime;
+            currentObject.Rigidbody.MovePosition(currentObject.transform.position + movement);
+        }
+    }
+
     private void CheckInput()
     {
-        if (isCarryingObject)
+        if (isInteractionObject)
         {
             currentMovementSpeed = movementSpeedOnCarryObject;
             if (forwardDirectionOnStartInteraction != invalidDirection)
@@ -78,11 +87,12 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+
     private void CharacterRotation()
     {
         if (xInput != 0 || zInput != 0)
         {
-            if (isCarryingObject) return;
+            if (isInteractionObject) return;
             float targetAngle = Mathf.Atan2(xInput, zInput) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0, targetAngle, 0);
         }
@@ -93,16 +103,17 @@ public class PlayerMovement : MonoBehaviour
         Vector3 movement = new Vector3(xInput, 0, zInput).normalized * currentMovementSpeed * Time.fixedDeltaTime;
         rb.MovePosition(transform.position + movement);
     }
-
-    public void StartObjectInteraction()
+    public void StartPushPullObject(ObjectToPick itemToPickup)
     {
         forwardDirectionOnStartInteraction = transform.forward.normalized;
-        isCarryingObject = true;
+        isInteractionObject = true;
+        currentObject = itemToPickup;
     }
 
-    public void StopObjectInteraction()
+    public void StopPushPullObject()
     {
         forwardDirectionOnStartInteraction = new Vector3(-1, -1, -1);
-        isCarryingObject = false;
+        isInteractionObject = false;
+        currentObject = null;
     }
 }
