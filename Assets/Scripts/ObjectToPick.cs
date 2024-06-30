@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectToPick : MonoBehaviour, IPickable
+public class ObjectToPick : MonoBehaviour
 {
     public Transform groundChecker;
     public LayerMask whatIsGround;
@@ -63,20 +63,6 @@ public class ObjectToPick : MonoBehaviour, IPickable
             rb.drag = dragOnAir;
             rb.isKinematic = false;
         }
-    }
-
-    public void PickupObject(GameObject objectHolder)
-    {
-        this.objectHolder = objectHolder;
-        transform.parent = objectHolder.transform;
-        rb.useGravity = false;
-    }
-
-    public void DropObject()
-    {
-        objectHolder = null;
-        transform.parent = null;
-        rb.useGravity = true;
     }
 
     private void OnDrawGizmos()

@@ -51,6 +51,7 @@ public class PlayerMovement : MonoBehaviour
         if (isInteractionObject)
         {
             currentMovementSpeed = movementSpeedOnCarryObject;
+            //Clamp Input value based on forward direction of player when start interaction
             if (forwardDirectionOnStartInteraction != invalidDirection)
             {
                 int xDirection = Mathf.Abs((int)forwardDirectionOnStartInteraction.x);
@@ -116,4 +117,10 @@ public class PlayerMovement : MonoBehaviour
         isInteractionObject = false;
         currentObject = null;
     }
+
+    public bool IsMovingToleft => xInput < 0;
+    public bool IsMovingToRight => xInput > 0;
+    public bool IsMovingForward => zInput > 0;
+    public bool IsMovingBackward => zInput < 0;
+    public bool IsStandStill => xInput == 0 && zInput == 0;
 }

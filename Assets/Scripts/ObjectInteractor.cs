@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class ObjectInteractor : MonoBehaviour
 {
-    public GameObject objectHolder;
-    public GameObject pushObjectHolder;
+    public CameraController cameraController;
     public LayerMask whatIsPickable;
     public float pickupRadius;
     public float pushForceMagnitude;
@@ -19,6 +18,7 @@ public class ObjectInteractor : MonoBehaviour
         playerMovement = GetComponentInParent<PlayerMovement>();
     }
 
+    // y 2, z -6
     private void Update()
     {
         HandleUserInput();
@@ -45,6 +45,7 @@ public class ObjectInteractor : MonoBehaviour
                 {
                     currentObjectInHand = itemToPickup;
                     playerMovement.StartPushPullObject(itemToPickup);
+                    cameraController.StartPushPullObject();
                     isInteractingWithObject = true;
                 }
             }
@@ -57,6 +58,7 @@ public class ObjectInteractor : MonoBehaviour
         {
             currentObjectInHand = null;
             playerMovement.StopPushPullObject();
+            cameraController.StopPushPullObject();
             isInteractingWithObject = false;
         }
     }
