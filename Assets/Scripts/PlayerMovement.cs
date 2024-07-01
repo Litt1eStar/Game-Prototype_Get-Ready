@@ -11,7 +11,11 @@ public class PlayerMovement : MonoBehaviour
     public float movementSpeedOnCarryObject;
     public float rotationSpeed = 90f;
 
+    [Header("Player Interactor")]
+    [SerializeField] private Transform objectHolder;
+
     private Rigidbody rb;
+    private BoxCollider boxCollider;
     private float xInput;
     private float zInput;
 
@@ -19,15 +23,20 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 invalidDirection = new Vector3(-1, -1, -1);
     private Vector3 forwardDirectionOnStartInteraction;
     private bool isInteractionObject = false;
+    private bool isPushPull = false;
+    private bool isPickup = false;
     private float currentMovementSpeed;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        boxCollider = GetComponent<BoxCollider>();
         currentMovementSpeed = walkSpeed;
     }
 
     private void Update()
     {
+        Debug.Log("IsPushPullObject: " + IsPushPullObject);
+        Debug.Log("IsPickupObject: " + IsPickupObject);
         CheckInput();
         CharacterRotation();
     }
@@ -50,6 +59,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isInteractionObject && currentObject != null)
         {
+            if (IsPickupObject)
+            {
+                xInput = Input.GetAxisRaw("Horizontal");
+                zInput = Input.GetAxisRaw("Vertical");
+                return;
+            }
+
             AdjustMovementSpeedBasedOnObjectWeight();
             
             if (forwardDirectionOnStartInteraction != invalidDirection)
@@ -93,22 +109,18 @@ public class PlayerMovement : MonoBehaviour
         float objectWeight = currentObject.ObjectWeight;
         
         if(objectWeight > 0f && objectWeight <= 10f)
-        {
             currentMovementSpeed = walkSpeed * 0.8f;
-        }else if(objectWeight > 10f && objectWeight <= 30)
-        {
+        else if(objectWeight > 10f && objectWeight <= 30)
             currentMovementSpeed = walkSpeed * 0.6f;
-        }else if(objectWeight > 30)
-        {
+        else if(objectWeight > 30)
             currentMovementSpeed = walkSpeed * 0.25f;
-        }
     }
 
     private void CharacterRotation()
     {
         if (xInput != 0 || zInput != 0)
         {
-            if (isInteractionObject) return;
+            if (IsPushPullObject) return;
             float targetAngle = Mathf.Atan2(xInput, zInput) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0, targetAngle, 0);
         }
@@ -119,17 +131,30 @@ public class PlayerMovement : MonoBehaviour
         Vector3 movement = new Vector3(xInput, 0, zInput).normalized * currentMovementSpeed * Time.fixedDeltaTime;
         rb.MovePosition(transform.position + movement);
     }
+    public void StartPickupObject(ObjectToPick itemToPickup)
+    {
+        isInteractionObject = true;
+        isPickup = true;
+        forwardDirectionOnStartInteraction = transform.forward.normalized;
+        currentObject = itemToPickup;
+        currentObject.SetObjectHolder(objectHolder);
+    }
+
     public void StartPushPullObject(ObjectToPick itemToPickup)
     {
         forwardDirectionOnStartInteraction = transform.forward.normalized;
         isInteractionObject = true;
+        isPushPull = true;
         currentObject = itemToPickup;
     }
 
-    public void StopPushPullObject()
+    public void StopInteractWithObject()
     {
         forwardDirectionOnStartInteraction = new Vector3(-1, -1, -1);
         isInteractionObject = false;
+        isPushPull = false;
+        isPickup = false;
+        currentObject.ClearObjectHolder();
         currentObject = null;
     }
 
@@ -138,4 +163,6 @@ public class PlayerMovement : MonoBehaviour
     public bool IsMovingForward => zInput > 0;
     public bool IsMovingBackward => zInput < 0;
     public bool IsStandStill => xInput == 0 && zInput == 0;
+    public bool IsPickupObject => currentObject != null && isInteractionObject && isPickup && !isPushPull;
+    public bool IsPushPullObject => currentObject != null && isInteractionObject && isPushPull && !isPickup;
 }

@@ -14,8 +14,9 @@ public class ObjectToPick : MonoBehaviour
     [SerializeField] private ObjectSO objectData;
 
     private Rigidbody rb;
-    private GameObject objectHolder;
+    private Transform objectHolder;
     private bool isGrounded = true;
+    public ObjectSize ObjectSize => objectData.Size;
     public float ObjectWeight => objectData.Weight;
     public Rigidbody Rigidbody => rb;
 
@@ -33,7 +34,8 @@ public class ObjectToPick : MonoBehaviour
         SetRigidbodyInfo();
         if (objectHolder != null)
         {
-            rb.MovePosition(objectHolder.transform.position);
+            transform.position = objectHolder.position;
+            //rb.MovePosition(objectHolder.transform.position);
         }
     }
 
@@ -55,13 +57,32 @@ public class ObjectToPick : MonoBehaviour
                 rb.isKinematic = false;
             }
         }
-        else
+        else if(!isGrounded) 
         {
-            rb.drag = dragOnAir;
-            rb.isKinematic = false;
+            if (objectHolder == null)
+            {
+                rb.drag = dragOnAir;
+                rb.isKinematic = false;
+            }
+            else
+            {
+                rb.drag = dragOnAir;
+                rb.isKinematic = true;
+            }
         }
     }
 
+    public void SetObjectHolder(Transform objectHolder)
+    {
+        this.objectHolder = objectHolder;
+        transform.parent = objectHolder;
+    }
+
+    public void ClearObjectHolder()
+    {
+        objectHolder = null;
+        transform.parent = null;
+    }
     private void OnDrawGizmos()
     {
         Gizmos.DrawLine(groundChecker.position, groundChecker.position + new Vector3(0, -groundCheckDistance, 0));

@@ -29,39 +29,61 @@ public class ObjectInteractor : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F))
         {
             if (!isInteractingWithObject)
-                PushObject();
-            else
-                ReleaseObject();
-        }
-    }
-    private void PushObject()
-    {
-        if (currentObjectInHand == null)
-        {
-            Collider[] pickableColliders = Physics.OverlapSphere(transform.position, pickupRadius, whatIsPickable);
-            if (pickableColliders.Length > 0)
             {
-                foreach (Collider collider in pickableColliders)
+                Collider[] pickableColliders = Physics.OverlapSphere(transform.position, pickupRadius, whatIsPickable);
+                if (pickableColliders.Length > 0)
                 {
-                    if(collider.gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick itemToPickup))
+                    foreach (Collider collider in pickableColliders)
                     {
-                        currentObjectInHand = itemToPickup;
-                        playerMovement.StartPushPullObject(itemToPickup);
-                        cameraController.StartPushPullObject();
-                        isInteractingWithObject = true;
-                        return;
+                        if (collider.gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick objectToInteractWith))
+                        {
+                            if(objectToInteractWith.ObjectSize == ObjectSize.SMALL)
+                            {
+                                StartPickupObject(objectToInteractWith);
+                            }
+                            else if(objectToInteractWith.ObjectSize == ObjectSize.MEDIUM || objectToInteractWith.ObjectSize == ObjectSize.LARGE)
+                            {
+                                StartPushPullObject(objectToInteractWith);
+                            }
+                        }
                     }
                 }
+            }
+            else
+            {
+                StopInteractWithObject();
             }
         }
     }
 
-    private void ReleaseObject()
+    private void StartPickupObject(ObjectToPick objectToInteractWith)
+    {
+        if (currentObjectInHand == null)
+        {
+            currentObjectInHand = objectToInteractWith;
+            playerMovement.StartPickupObject(objectToInteractWith);
+            cameraController.StartPushPullObject();
+            isInteractingWithObject = true;
+        }
+    }
+
+    private void StartPushPullObject(ObjectToPick objectToInteractWith)
+    {
+        if (currentObjectInHand == null)
+        {
+            currentObjectInHand = objectToInteractWith;
+            playerMovement.StartPushPullObject(objectToInteractWith);
+            cameraController.StartPushPullObject();
+            isInteractingWithObject = true;
+        }
+    }
+
+    private void StopInteractWithObject()
     {
         if (currentObjectInHand != null)
         {
             currentObjectInHand = null;
-            playerMovement.StopPushPullObject();
+            playerMovement.StopInteractWithObject();
             cameraController.StopPushPullObject();
             isInteractingWithObject = false;
         }
