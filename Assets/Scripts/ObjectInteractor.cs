@@ -41,12 +41,16 @@ public class ObjectInteractor : MonoBehaviour
             Collider[] pickableColliders = Physics.OverlapSphere(transform.position, pickupRadius, whatIsPickable);
             if (pickableColliders.Length > 0)
             {
-                if (pickableColliders[0].gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick itemToPickup))
+                foreach (Collider collider in pickableColliders)
                 {
-                    currentObjectInHand = itemToPickup;
-                    playerMovement.StartPushPullObject(itemToPickup);
-                    cameraController.StartPushPullObject();
-                    isInteractingWithObject = true;
+                    if(collider.gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick itemToPickup))
+                    {
+                        currentObjectInHand = itemToPickup;
+                        playerMovement.StartPushPullObject(itemToPickup);
+                        cameraController.StartPushPullObject();
+                        isInteractingWithObject = true;
+                        return;
+                    }
                 }
             }
         }

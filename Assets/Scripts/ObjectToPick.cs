@@ -4,18 +4,20 @@ using UnityEngine;
 
 public class ObjectToPick : MonoBehaviour
 {
-    public Transform groundChecker;
-    public LayerMask whatIsGround;
-    public float groundCheckDistance;
-    public float dragOnGround = 500f;
-    public float dragOnAir = 1f;
-    public float forceMagnitude = 10f;
+    [SerializeField] private Transform groundChecker;
+    [SerializeField] private LayerMask whatIsGround;
+    [SerializeField] private float groundCheckDistance;
+    [SerializeField] private float dragOnGround = 500f;
+    [SerializeField] private float dragOnAir = 1f;
+    [SerializeField] private float forceMagnitude = 10f;
 
-    public Rigidbody Rigidbody => rb;
+    [SerializeField] private ObjectSO objectData;
 
     private Rigidbody rb;
     private GameObject objectHolder;
     private bool isGrounded = true;
+    public float ObjectWeight => objectData.Weight;
+    public Rigidbody Rigidbody => rb;
 
     private void Start()
     {
@@ -25,11 +27,6 @@ public class ObjectToPick : MonoBehaviour
     private void Update()
     {
         CheckGround();
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-
-            rb.AddForce(Vector3.forward * forceMagnitude, ForceMode.Impulse);
-        }
     }
     private void FixedUpdate()
     {

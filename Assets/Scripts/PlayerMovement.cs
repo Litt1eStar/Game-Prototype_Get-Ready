@@ -48,10 +48,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void CheckInput()
     {
-        if (isInteractionObject)
+        if (isInteractionObject && currentObject != null)
         {
-            currentMovementSpeed = movementSpeedOnCarryObject;
-            //Clamp Input value based on forward direction of player when start interaction
+            AdjustMovementSpeedBasedOnObjectWeight();
+            
             if (forwardDirectionOnStartInteraction != invalidDirection)
             {
                 int xDirection = Mathf.Abs((int)forwardDirectionOnStartInteraction.x);
@@ -88,6 +88,21 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    private void AdjustMovementSpeedBasedOnObjectWeight()
+    {
+        float objectWeight = currentObject.ObjectWeight;
+        
+        if(objectWeight > 0f && objectWeight <= 10f)
+        {
+            currentMovementSpeed = walkSpeed * 0.8f;
+        }else if(objectWeight > 10f && objectWeight <= 30)
+        {
+            currentMovementSpeed = walkSpeed * 0.6f;
+        }else if(objectWeight > 30)
+        {
+            currentMovementSpeed = walkSpeed * 0.25f;
+        }
+    }
 
     private void CharacterRotation()
     {
