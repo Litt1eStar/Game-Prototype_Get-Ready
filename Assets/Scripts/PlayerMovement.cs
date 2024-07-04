@@ -15,28 +15,29 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform objectHolder;
 
     private Rigidbody rb;
-    private BoxCollider boxCollider;
     private float xInput;
     private float zInput;
 
-    private ObjectToPick currentObject;
+    public float HorizontalInput => xInput;
+    public float VerticalInput => zInput;
+    public float CurrentMovementSpeed => currentMovementSpeed;
+
+    private ObjectToInteract currentObject;
     private Vector3 invalidDirection = new Vector3(-1, -1, -1);
     private Vector3 forwardDirectionOnStartInteraction;
-    private bool isInteractionObject = false;
     private bool isPushPull = false;
     private bool isPickup = false;
     private float currentMovementSpeed;
+
+    public bool isAboveObject = false;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        boxCollider = GetComponent<BoxCollider>();
         currentMovementSpeed = walkSpeed;
     }
 
     private void Update()
     {
-        Debug.Log("IsPushPullObject: " + IsPushPullObject);
-        Debug.Log("IsPickupObject: " + IsPickupObject);
         CheckInput();
         CharacterRotation();
     }
@@ -48,8 +49,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionStay(Collision collision)
     {
-        if (isInteractionObject && currentObject != null) 
-        {
+        if (IsPushPullObject) 
+        {            
             Vector3 movement = new Vector3(xInput, 0, zInput).normalized * currentMovementSpeed * Time.fixedDeltaTime;
             currentObject.Rigidbody.MovePosition(currentObject.transform.position + movement);
         }
@@ -57,17 +58,16 @@ public class PlayerMovement : MonoBehaviour
 
     private void CheckInput()
     {
-        if (isInteractionObject && currentObject != null)
+        AdjustMovementSpeedBasedOnObjectWeight();
+        
+        if (IsPickupObject)
         {
-            if (IsPickupObject)
-            {
-                xInput = Input.GetAxisRaw("Horizontal");
-                zInput = Input.GetAxisRaw("Vertical");
-                return;
-            }
-
-            AdjustMovementSpeedBasedOnObjectWeight();
-            
+            xInput = Input.GetAxisRaw("Horizontal");
+            zInput = Input.GetAxisRaw("Vertical");
+            return;
+        }
+        else if (IsPushPullObject)
+        {
             if (forwardDirectionOnStartInteraction != invalidDirection)
             {
                 int xDirection = Mathf.Abs((int)forwardDirectionOnStartInteraction.x);
@@ -87,7 +87,6 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            currentMovementSpeed = walkSpeed;
             xInput = Input.GetAxisRaw("Horizontal");
             zInput = Input.GetAxisRaw("Vertical");
         }
@@ -106,8 +105,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void AdjustMovementSpeedBasedOnObjectWeight()
     {
+        if (currentObject == null)
+        {
+            currentMovementSpeed = walkSpeed;
+            return;
+        }
+
         float objectWeight = currentObject.ObjectWeight;
-        
+
         if(objectWeight > 0f && objectWeight <= 10f)
             currentMovementSpeed = walkSpeed * 0.8f;
         else if(objectWeight > 10f && objectWeight <= 30)
@@ -131,19 +136,17 @@ public class PlayerMovement : MonoBehaviour
         Vector3 movement = new Vector3(xInput, 0, zInput).normalized * currentMovementSpeed * Time.fixedDeltaTime;
         rb.MovePosition(transform.position + movement);
     }
-    public void StartPickupObject(ObjectToPick itemToPickup)
+    public void StartPickupObject(ObjectToInteract itemToPickup)
     {
-        isInteractionObject = true;
         isPickup = true;
         forwardDirectionOnStartInteraction = transform.forward.normalized;
         currentObject = itemToPickup;
         currentObject.SetObjectHolder(objectHolder);
     }
 
-    public void StartPushPullObject(ObjectToPick itemToPickup)
+    public void StartPushPullObject(ObjectToInteract itemToPickup)
     {
         forwardDirectionOnStartInteraction = transform.forward.normalized;
-        isInteractionObject = true;
         isPushPull = true;
         currentObject = itemToPickup;
     }
@@ -151,7 +154,6 @@ public class PlayerMovement : MonoBehaviour
     public void StopInteractWithObject()
     {
         forwardDirectionOnStartInteraction = new Vector3(-1, -1, -1);
-        isInteractionObject = false;
         isPushPull = false;
         isPickup = false;
         currentObject.ClearObjectHolder();
@@ -163,6 +165,6 @@ public class PlayerMovement : MonoBehaviour
     public bool IsMovingForward => zInput > 0;
     public bool IsMovingBackward => zInput < 0;
     public bool IsStandStill => xInput == 0 && zInput == 0;
-    public bool IsPickupObject => currentObject != null && isInteractionObject && isPickup && !isPushPull;
-    public bool IsPushPullObject => currentObject != null && isInteractionObject && isPushPull && !isPickup;
+    public bool IsPickupObject => currentObject != null && isPickup && !isPushPull;
+    public bool IsPushPullObject => currentObject != null && isPushPull && !isPickup;
 }

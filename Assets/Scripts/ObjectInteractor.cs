@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class ObjectInteractor : MonoBehaviour
 {
-    public CameraController cameraController;
     public LayerMask whatIsPickable;
     public float pickupRadius;
     public float pushForceMagnitude;
 
     private PlayerMovement playerMovement;
-    private ObjectToPick currentObjectInHand;
+    private ObjectToInteract currentObjectInHand;
     private bool isInteractingWithObject = false;
 
     private void Start()
@@ -18,7 +17,6 @@ public class ObjectInteractor : MonoBehaviour
         playerMovement = GetComponentInParent<PlayerMovement>();
     }
 
-    // y 2, z -6
     private void Update()
     {
         HandleUserInput();
@@ -35,7 +33,7 @@ public class ObjectInteractor : MonoBehaviour
                 {
                     foreach (Collider collider in pickableColliders)
                     {
-                        if (collider.gameObject.TryGetComponent<ObjectToPick>(out ObjectToPick objectToInteractWith))
+                        if (collider.gameObject.TryGetComponent<ObjectToInteract>(out ObjectToInteract objectToInteractWith))
                         {
                             if(objectToInteractWith.ObjectSize == ObjectSize.SMALL)
                             {
@@ -55,25 +53,22 @@ public class ObjectInteractor : MonoBehaviour
             }
         }
     }
-
-    private void StartPickupObject(ObjectToPick objectToInteractWith)
+    private void StartPickupObject(ObjectToInteract objectToInteractWith)
     {
         if (currentObjectInHand == null)
         {
             currentObjectInHand = objectToInteractWith;
             playerMovement.StartPickupObject(objectToInteractWith);
-            cameraController.StartPushPullObject();
             isInteractingWithObject = true;
         }
     }
 
-    private void StartPushPullObject(ObjectToPick objectToInteractWith)
+    private void StartPushPullObject(ObjectToInteract objectToInteractWith)
     {
         if (currentObjectInHand == null)
         {
             currentObjectInHand = objectToInteractWith;
             playerMovement.StartPushPullObject(objectToInteractWith);
-            cameraController.StartPushPullObject();
             isInteractingWithObject = true;
         }
     }
@@ -84,7 +79,6 @@ public class ObjectInteractor : MonoBehaviour
         {
             currentObjectInHand = null;
             playerMovement.StopInteractWithObject();
-            cameraController.StopPushPullObject();
             isInteractingWithObject = false;
         }
     }

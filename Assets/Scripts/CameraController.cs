@@ -17,7 +17,6 @@ public class CameraController : MonoBehaviour
 
     public Transform cameraTracker;
 
-    private bool isInteractingWithObject;
     private PlayerMovement playerTransform;
 
     private void Start()
@@ -32,7 +31,7 @@ public class CameraController : MonoBehaviour
 
     private void HandleCinemachineCamera()
     {
-        if (isInteractingWithObject)
+        if (playerTransform.IsPushPullObject)
         {
             if (playerTransform.IsStandStill)
             {
@@ -81,15 +80,5 @@ public class CameraController : MonoBehaviour
             virtualCameraWhileInteracting_leftOffset.gameObject.SetActive(false);
             virtualCameraWhileInteracting_rightOffset.gameObject.SetActive(false);
         }
-    }
-
-    public void StartPushPullObject()
-    {
-        isInteractingWithObject = true;
-    }
-
-    public void StopPushPullObject()
-    {
-        isInteractingWithObject = false;
     }
 }
