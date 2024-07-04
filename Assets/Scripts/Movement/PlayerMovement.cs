@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : BaseMovement
 {
     [Header("Player Movement Setting")]
     public float walkSpeed;
@@ -14,31 +14,24 @@ public class PlayerMovement : MonoBehaviour
     [Header("Player Interactor")]
     [SerializeField] private Transform objectHolder;
 
-    private Rigidbody rb;
-    private float xInput;
-    private float zInput;
-
-    public float HorizontalInput => xInput;
-    public float VerticalInput => zInput;
-    public float CurrentMovementSpeed => currentMovementSpeed;
 
     private ObjectToInteract currentObject;
-    private Vector3 invalidDirection = new Vector3(-1, -1, -1);
-    private Vector3 forwardDirectionOnStartInteraction;
     private bool isPushPull = false;
     private bool isPickup = false;
-    private float currentMovementSpeed;
+    public float CurrentMovementSpeed => currentMovementSpeed;
+    public float HorizontalInput => xInput;
+    public float VerticalInput => zInput;
 
-    public bool isAboveObject = false;
-    private void Start()
+    public override void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        base.Start();
         currentMovementSpeed = walkSpeed;
     }
 
-    private void Update()
+    public override void Update()
     {
-        CheckInput();
+        base.Update();
+        GetMovementInput();
         CharacterRotation();
     }
 
@@ -56,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void CheckInput()
+    private void GetMovementInput()
     {
         AdjustMovementSpeedBasedOnObjectWeight();
         

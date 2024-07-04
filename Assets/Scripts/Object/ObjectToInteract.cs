@@ -33,19 +33,18 @@ public class ObjectToInteract : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
     private void Update()
     {
         CheckGround();
         CheckAboveObject();
-        ApplyObjectToChildOfBasedObject();
-    }
-
-    private void FixedUpdate()
-    {
         SetRigidbodyInfo();
+
+        if(objectData.Size != ObjectSize.SMALL)
+            ApplyObjectToChildOfBasedObject();
+        else if(objectData.Size == ObjectSize.SMALL && objectHolder != null)
+            transform.localPosition = Vector3.zero;
     }
 
     private void ApplyObjectToChildOfBasedObject()
