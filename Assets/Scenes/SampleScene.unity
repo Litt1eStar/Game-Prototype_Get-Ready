@@ -2132,8 +2132,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1781124711}
   - component: {fileID: 1781124712}
+  - component: {fileID: 1781124713}
   m_Layer: 6
-  m_Name: ObjectPicker
+  m_Name: Object Action
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2171,6 +2172,20 @@ MonoBehaviour:
     m_Bits: 128
   pickupRadius: 0.54
   pushForceMagnitude: 30
+--- !u!114 &1781124713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1781124710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9c362bab79adb64a8d2e7aad4c17bd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonToThrow: 113
+  throwForce: 20
 --- !u!1 &1923187134
 GameObject:
   m_ObjectHideFlags: 3

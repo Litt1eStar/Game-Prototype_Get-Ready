@@ -9,12 +9,14 @@ public class ObjectInteractor : MonoBehaviour
     public float pushForceMagnitude;
 
     private PlayerMovement playerMovement;
+    private ObjectThrower thrower;
     private ObjectToInteract currentObjectInHand;
     private bool isInteractingWithObject = false;
 
     private void Start()
     {
         playerMovement = GetComponentInParent<PlayerMovement>();
+        thrower = GetComponent<ObjectThrower>();
     }
 
     private void Update()
@@ -35,13 +37,15 @@ public class ObjectInteractor : MonoBehaviour
                     {
                         if (collider.gameObject.TryGetComponent<ObjectToInteract>(out ObjectToInteract objectToInteractWith))
                         {
-                            if(objectToInteractWith.ObjectSize == ObjectSize.SMALL)
+                            if (objectToInteractWith.ObjectSize == ObjectSize.SMALL)
                             {
                                 StartPickupObject(objectToInteractWith);
+                                break; // Stop searching after finding the first object
                             }
-                            else if(objectToInteractWith.ObjectSize == ObjectSize.MEDIUM || objectToInteractWith.ObjectSize == ObjectSize.LARGE)
+                            else if (objectToInteractWith.ObjectSize == ObjectSize.MEDIUM || objectToInteractWith.ObjectSize == ObjectSize.LARGE)
                             {
                                 StartPushPullObject(objectToInteractWith);
+                                break; // Stop searching after finding the first object
                             }
                         }
                     }
@@ -53,11 +57,13 @@ public class ObjectInteractor : MonoBehaviour
             }
         }
     }
+
     private void StartPickupObject(ObjectToInteract objectToInteractWith)
     {
         if (currentObjectInHand == null)
         {
-            currentObjectInHand = objectToInteractWith;
+            SetObjectOnHand(objectToInteractWith);
+            objectToInteractWith.SetObjectHolder(transform); // Attach to interactor
             playerMovement.StartPickupObject(objectToInteractWith);
             isInteractingWithObject = true;
         }
@@ -67,7 +73,8 @@ public class ObjectInteractor : MonoBehaviour
     {
         if (currentObjectInHand == null)
         {
-            currentObjectInHand = objectToInteractWith;
+            SetObjectOnHand(objectToInteractWith);
+            objectToInteractWith.SetObjectHolder(transform); // Attach to interactor
             playerMovement.StartPushPullObject(objectToInteractWith);
             isInteractingWithObject = true;
         }
@@ -77,10 +84,23 @@ public class ObjectInteractor : MonoBehaviour
     {
         if (currentObjectInHand != null)
         {
-            currentObjectInHand = null;
+            currentObjectInHand.ClearObjectHolder();
+            ClearObjectOnHand();
             playerMovement.StopInteractWithObject();
             isInteractingWithObject = false;
         }
+    }
+
+    private void SetObjectOnHand(ObjectToInteract objectToInteractWith)
+    {
+        currentObjectInHand = objectToInteractWith;
+        thrower.SetObjcetOnHand(currentObjectInHand);
+    }
+
+    private void ClearObjectOnHand()
+    {
+        currentObjectInHand = null;
+        thrower.ClearObjectOnHand();
     }
 
     private void OnDrawGizmos()
