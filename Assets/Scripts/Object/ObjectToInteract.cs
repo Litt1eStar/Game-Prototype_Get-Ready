@@ -23,6 +23,7 @@ public class ObjectToInteract : MonoBehaviour
     private FixedJoint joint;
     private Rigidbody rb;
     private Transform objectHolder;
+    private bool isThrowing = false;
     private bool isGrounded = true;
     private bool isAboveObject = false;
 
@@ -41,9 +42,9 @@ public class ObjectToInteract : MonoBehaviour
         CheckAboveObject();
         SetRigidbodyInfo();
 
-        if(objectData.Size != ObjectSize.SMALL)
+        if (objectData.Size != ObjectSize.SMALL)
             ApplyObjectToChildOfBasedObject();
-        else if(objectData.Size == ObjectSize.SMALL && objectHolder != null)
+        else if (objectData.Size == ObjectSize.SMALL && objectHolder != null)
             transform.localPosition = Vector3.zero;
     }
 
@@ -97,21 +98,35 @@ public class ObjectToInteract : MonoBehaviour
         if (isGrounded)
         {
             rb.drag = dragOnGround;
-            rb.isKinematic = false; 
+            rb.isKinematic = false;
         }
         else
         {
-            if (objectHolder == null)
+            if (isThrowing)
             {
-                rb.drag = dragOnAir;
-                rb.isKinematic = false; 
+                EnablePhysicAction();
+            }
+            else if (!isThrowing && objectHolder != null)
+            {
+                DisablePhysicAction();
             }
             else
             {
-                rb.drag = dragOnAir;
-                rb.isKinematic = true; 
+                EnablePhysicAction();
             }
         }
+    }
+
+    public void EnablePhysicAction()
+    {
+        rb.drag = dragOnAir;
+        rb.isKinematic = false;
+    }
+
+    public void DisablePhysicAction()
+    {
+        rb.drag = dragOnAir;
+        rb.isKinematic = true;
     }
 
     public void SetObjectHolder(Transform objectHolder)
@@ -120,11 +135,24 @@ public class ObjectToInteract : MonoBehaviour
         transform.parent = objectHolder;
     }
 
+    public void StartThrowingObject()
+    {
+        isThrowing = true;
+        EnablePhysicAction(); // Ensure physics is enabled when throwing
+    }
+
+    public void FinishThrowingObject()
+    {
+        isThrowing = false;
+    }
+
     public void ClearObjectHolder()
     {
         objectHolder = null;
         transform.parent = null;
     }
+
+    public bool ObjectIsOnGround() => isGrounded;
 
     private void OnDrawGizmos()
     {

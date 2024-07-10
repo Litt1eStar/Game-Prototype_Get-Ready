@@ -153,6 +153,7 @@ public class PlayerMovement : BaseMovement
         currentObject = null;
     }
 
+    public Vector3 forwardDirectionOnUpdate() => new Vector3(xInput, 0, zInput);
     public bool IsMovingToleft => xInput < 0;
     public bool IsMovingToRight => xInput > 0;
     public bool IsMovingForward => zInput > 0;
